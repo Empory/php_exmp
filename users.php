@@ -35,23 +35,24 @@ if (isset($_POST['save'])) {
     exit();
 }
 
-function displayTags() {
-    global $conn;
+// Handle the update action
+if (isset($_POST['update'])) {
+    // Get the user input and sanitize it
+    $id = mysqli_real_escape_string($conn, $_POST['id']);
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+    $role = mysqli_real_escape_string($conn, $_POST['role']);
 
-    // Get all the tags from the database
-    $sql = "SELECT * FROM tags";
-    $result = mysqli_query($conn, $sql);
+    // Update the user record in the database
+    $sql = "UPDATE users SET username='$username', email='$email', password='$password', role='$role' WHERE id=$id";
+    mysqli_query($conn, $sql);
 
-    // Display each tag with an "Edit" link
-    while ($tag = mysqli_fetch_assoc($result)) {
-        echo '<div>';
-        echo '<h3>' . $tag['name'] . '</h3>';
-        echo '<p>' . $tag['description'] . '</p>';
-        echo '<a href="edit_tag.php?id=' . $tag['id'] . '">Edit</a>';
-        echo '</div>';
-    }
+    // Redirect the user to the users page
+    header('Location: users.php');
+    exit();
 }
-
+// Fetch all the user records from the database
 
 
 
@@ -68,8 +69,6 @@ if (isset($_GET['delete'])) {
     header('Location: users.php');
     exit();
 }
-
-// Fetch all the user records from the database
 $sql = "SELECT * FROM users";
 $result = mysqli_query($conn, $sql);
 $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -127,6 +126,30 @@ $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
         </select>
         <br>
         <?php if ($id > 0): ?>
+            <button type="submit" name="update">Update User</button>
+        <?php else: ?>
+            <button type="submit" name="save">Add User</button>
+        <?php endif; ?>
+    </form>
+    <h2>Update User</h2>
+    <form method="post" action="users.php">
+        <input type="hidden" name="id" value="<?php echo $id; ?>">
+        <label>Username</label>
+        <input type="text" name="username" value="<?php echo $username; ?>">
+        <br>
+        <label>Email</label>
+        <input type="email" name="email" value="<?php echo $email; ?>">
+        <br>
+        <label>Password</label>
+        <input type="password" name="password" value="<?php echo $password; ?>">
+        <br>
+        <label>Role</label>
+        <select name="role">
+            <option value="user" <?php if ($role == 'user') echo 'selected'; ?>>User</option>
+            <option value="admin" <?php if ($role == 'admin') echo 'selected'; ?>>Admin</option>
+        </select>
+        <br>
+        <?php if ($id >= 0): ?>
             <button type="submit" name="update">Update User</button>
         <?php else: ?>
             <button type="submit" name="save">Add User</button>
